@@ -1,11 +1,20 @@
-import rss, { pagesGlobToRssItems } from '@astrojs/rss';
+import rss from '@astrojs/rss';
+import { getCollection } from 'astro:content';
+import { pagesGlobToRssItems } from '@astrojs/rss';
 
 export async function GET(context) {
-  return rss({
+    
+    const posts = await getCollection("blog");
+    const rssItems = posts.map((post) => ({title: post.data.title, 
+        pubDate: post.data.pubDate, description: post.data.description,
+        link: `/posts/${post.id}`,
+    }))
+    
+    return rss({
     title: 'Astro Learner | Blog',
     description: 'My journey learning Astro',
     site: context.site,
-    items: await pagesGlobToRssItems(import.meta.glob('./**/*.md')),
+    items: rssItems,
     customData: `<language>en-us</language>`,
   });
 }
